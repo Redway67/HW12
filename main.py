@@ -1,18 +1,42 @@
 # ВАКАНСИИ
-
 import requests
 import pprint
 
-url = 'https://api.hh.ru/vacancies'
+DOMAIN = 'https://api.hh.ru/'
 
-params = {
-    'text': 'NAME:(Python OR Java) AND COMPANY_NAME:(1 OR 2 OR YANDEX) AND (DJANGO OR SPRING)',
-    # есть страницы т.к. данных много
-    'page': 1
-}
 
-result = requests.get(url, params=params).json()
+def area_choice():
+    while True:
+        area_answer = input('Введите название региона для поиска (по умолчанию Москва): ')
+        url_area = f'{DOMAIN}suggests/areas'
+        params = {'text': f'{area_answer}'}
+        print('Проверяем ...')
+        r = requests.get(url_area, params=params)
+        if r.status_code == 200:
+            result = r.json()
+            if result['items']:
+                print(f'Ищем вакансию в регионе {area_answer}')
+                return result['items'][0]['id']
+            else:
+                print('Такого региона нет!')
+        else:
+            print('Ищем вакансию по умолчанию в Москве')
+            break
 
-pprint.pprint(result)
-print(result['items'][0]['url'])
-print(result['items'][0]['alternate_url'])
+    return '1'
+
+
+if __name__ == '__main__':
+    area_param = area_choice()  # выбираем регион, по умолчанию Москва
+    ############
+    vacancy_answer = input('Введите название вакансии для поиска (по умолчанию python developer):')
+    vacancy_answer = 'python developer'
+    url_vacancies = f'{DOMAIN}vacancies'
+    par = {'text': vacancy_answer, 'area': area_param}
+    r = requests.get(url_vacancies, params=par)
+    result = r.json()
+    # print(result['found'])
+    pprint.pprint(result)
+    # items = result['items']
+    # first = items[0]
+    # print(first['area'])
