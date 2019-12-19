@@ -35,8 +35,8 @@ def get_statistic():
         params = {'text': vacancy_answer, 'area': area_param[0], 'page': p}
         results = requests.get(url_vacancies, params=params).json()
         for j in results['items']:
-            rez_tmp = requests.get(j['url']).json()
-            for i in rez_tmp['key_skills']:
+            resultj = requests.get(j['url']).json()
+            for i in resultj['key_skills']:
                 if i['name'] in skills:
                     skills[i['name']] += 1
                 else:
