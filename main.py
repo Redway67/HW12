@@ -1,6 +1,7 @@
 # ВАКАНСИИ
 import requests
 import pprint
+import time
 
 DOMAIN = 'https://api.hh.ru/'
 FOUND_RESTRICTION_HH = 2000  # ограничение hh.ru на количество выводимых вакансий
@@ -28,6 +29,28 @@ def area_choice():
     return ['1', 'Москва']
 
 
+def get_statistic():
+    skills = {}
+    for p in range(found//100+1):
+        params = {'text': vacancy_answer, 'area': area_param[0], 'page': p}
+        results = requests.get(url_vacancies, params=params).json()
+        for j in results['items']:
+            rez_tmp = requests.get(j['url']).json()
+            for i in rez_tmp['key_skills']:
+                if i['name'] in skills:
+                    skills[i['name']] += 1
+                else:
+                    skills.setdefault(i['name'], 1)
+
+    def by_value(item):
+        return item[1]
+
+    for k, v in sorted(skills.items(), key=by_value, reverse= True):
+        print(k, '->', v)
+
+    return
+
+
 if __name__ == '__main__':
     area_param = area_choice()  # выбираем регион, по умолчанию Москва
     # здесь можно еще добавлять будущие параметры
@@ -46,7 +69,8 @@ if __name__ == '__main__':
             if found > FOUND_RESTRICTION_HH:
                 print(
                     f'Из-за ограничения на hh.ru статистика будет рассчитана по {FOUND_RESTRICTION_HH} вакансий!')
-            pprint.pprint(result)
+                found = FOUND_RESTRICTION_HH
+            get_statistic()
         else:
             print(f'В регионе {area_param[1]} вакансии {vacancy_answer} не найдено.')
     else:
